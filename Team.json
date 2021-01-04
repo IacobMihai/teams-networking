@@ -1,12 +1,15 @@
 [
     {
-        "FirstName": "Iacob",
-        "LastName": "Mihai",
+        "id": "a123",
+        "firstName": "Iacob",
+        "lastName": "Mihai",
         "gitHub": "IacobMihai"
     },
     {
-        "FirstName": "Roman",
-        "LastName": "Mihai",
+        "id": "b123",
+        "firstName": "Roman",
+        "lastName": "Mihai",
         "gitHub": "RomanMihai"
     }
-    ]
+    
+]

@@ -1,3 +1,24 @@
+const API = {
+    CREATE: {
+        URL: "create.json",
+        METHOD: "GET" // POST
+    },
+    READ: {
+        URL: "team.json",
+        METHOD: "GET"
+    },
+    UPDATE: {
+        URL: "",
+        METHOD: "GET"
+    },
+    DELETE: {
+        URL: "delete.json",
+        METHOD: "GET"
+    }
+};
+
+API.READ.URL
+
 function insertPersons(persons) {
     const tBody = document.querySelector("#list tbody");
     tBody.innerHTML = getPersonsHtml(persons);
@@ -15,8 +36,8 @@ function getPersonHtml(person) {
         <a href= ${person.github}>here</a>
     </td>
         <td>
-        <button class="delete-member">Delete</button>
-         </td>
+            <a href="${API.DELETE.URL}?id=${person.id}">&#10006;</a>
+        </td>
  </tr>`;
 }
 
@@ -29,7 +50,7 @@ function clearInputFields() {
 
 let allPersons = [];
 
-fetch("data/team.json")
+fetch("team.json")
     .then(res => res.json())
     .then((data) => {
         allPersons = data;
@@ -44,12 +65,42 @@ function searchPersons(text) {
             person.lastName.toLowerCase().indexOf(text) > -1;
     });
 }
+ 
+function saveMember() {
+    const firstName = document.querySelector("input[name=firstName]").value;
+    const lastName = document.querySelector("input[name=lastName]").value;
+    const gitHub = document.querySelector("input[name=gitHub]").value;
+    const person = {
+        firstName, 
+        lastName, 
+        gitHub: gitHub
 
-const search = document.getElementById("search");
-search.addEventListener("input", e => {
-    const text = e.target.value;
+    };
+    console.info('saving...', person, JSON.stringify(person));
 
-    const filtrate = searchPersons(text);
+    fetch(API.CREATE.URL, {
+    method:  API.CREATE.METHOD, 
+    body: API.CREATE.METHOD === "GET" ? null : JSON.stringify(person)
+        })
+        .then(res => res.json())
+        .then(r => {
+            console.warn(r);
+            if (r.succes) {
+                alert('saving data..., please wait until we are ready.');
+                setTimeout(() => {
+                    console.info('refresh list');
+                    loadList();
+            }, 30000);
 
-    insertPersons(filtrate);
+                
+            }
+        
+        });
+}
+
+
+const saveBtn = document.querySelector("#list button");
+saveBtn.addEventListener("click", () => {
+    saveMember();
+
 });

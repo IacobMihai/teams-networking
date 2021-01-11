@@ -1,106 +1,142 @@
 const API = {
     CREATE: {
-        URL: "create.json",
-        METHOD: "GET" // POST
+        URL: "http://localhost:3000/teams-json/create",
+        METHOD: "POST"
     },
     READ: {
-        URL: "team.json",
+        URL: "http://localhost:3000/teams-json",
         METHOD: "GET"
     },
     UPDATE: {
-        URL: "",
-        METHOD: "GET"
+        URL: "http://localhost:3000/teams-json/update",
+        METHOD: "PUT"
     },
     DELETE: {
-        URL: "delete.json",
-        METHOD: "GET"
+        URL: "http://localhost:3000/teams-json/delete",
+        METHOD: "DELETE"
     }
 };
-
-API.READ.URL
-
 function insertPersons(persons) {
-    const tBody = document.querySelector("#list tbody");
-    tBody.innerHTML = getPersonsHtml(persons);
+    const tbody = document.querySelector('#list tbody');
+    tbody.innerHTML = getPersonsHtml(persons);
 }
-
 function getPersonsHtml(persons) {
     return persons.map(getPersonHtml).join("");
 }
-
 function getPersonHtml(person) {
+    const gitHub = person.gitHub;
     return `<tr>
-    <td>${person.firstName}</td>
-    <td>${person.lastName}</td>
-    <td>
-        <a href= ${person.github}>here</a>
-    </td>
+        <td>${person.firstName}</td>
+        <td>${person.lastName}</td>
+        <td><a target="_blank" href="https://github.com/${gitHub}">Github</a></td>
         <td>
-            <a href="${API.DELETE.URL}?id=${person.id}">&#10006;</a>
+            <a href="#" class="delete-row" data-id="${person.id}">&#10006;</a>
         </td>
- </tr>`;
+    </tr>`;
 }
-
-function clearInputFields() {
-    document.querySelectorAll("input").forEach(input => {
-        input.value = "";
-    });
-}
-
-
 let allPersons = [];
-
-fetch("team.json")
-    .then(res => res.json())
-    .then((data) => {
-        allPersons = data;
-        insertPersons(data);
-    });
-
+function loadList() {
+    fetch(API.READ.URL)
+        .then(res => res.json())
+        .then(data => {
+            allPersons = data;
+            insertPersons(data);
+        });
+}
+loadList();
 function searchPersons(text) {
     text = text.toLowerCase();
-    console.log(text);
+    console.warn("search", text);
     return allPersons.filter(person => {
         return person.firstName.toLowerCase().indexOf(text) > -1 ||
             person.lastName.toLowerCase().indexOf(text) > -1;
     });
 }
- 
-function saveMember() {
-    const firstName = document.querySelector("input[name=firstName]").value;
+
+function saveTeamMember() {
+    const firstName = document.querySelector("#list input[name=firstName]").value;
     const lastName = document.querySelector("input[name=lastName]").value;
     const gitHub = document.querySelector("input[name=gitHub]").value;
     const person = {
-        firstName, 
-        lastName, 
+        firstName,
+        lastName,
         gitHub: gitHub
-
     };
     console.info('saving...', person, JSON.stringify(person));
-
     fetch(API.CREATE.URL, {
-    method:  API.CREATE.METHOD, 
-    body: API.CREATE.METHOD === "GET" ? null : JSON.stringify(person)
-        })
+        method: API.CREATE.METHOD,
+        headers: {
+            "Content-Type": "application/json"
+        },
+
+        body: API.CREATE.METHOD === "GET" ? null : JSON.stringify(person)
+    })
         .then(res => res.json())
         .then(r => {
             console.warn(r);
-            if (r.succes) {
+            if (r.success) {
                 alert('saving data..., please wait until we are ready.');
-                setTimeout(() => {
-                    console.info('refresh list');
-                    loadList();
-            }, 30000);
-
-                
+                console.info('refresh list');
+                loadList();
             }
-        
         });
 }
 
+function deleteTeamMember(id) {
+    console.warn('delete', id);
+    fetch("http://localhost:3000/teams-json/delete", {
+        method: "DELETE",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ id })
+    });
 
-const saveBtn = document.querySelector("#list button");
-saveBtn.addEventListener("click", () => {
-    saveMember();
+}
 
-});
+function addEventListeners() {
+    const search = document.getElementById('search');
+    search.addEventListener("input", e => {
+        const text = e.target.value;
+
+        const filtrate = searchPersons(text);
+        console.info({ filtrate })
+
+        insertPersons(filtrate);
+    });
+
+    const saveBtn = document.querySelector("#list tfoot button");
+    saveBtn.addEventListener("click", () => {
+        saveTeamMember();
+    });
+
+    const table = document.querySelector("#list tbody");
+    table.addEventListener("click", (e) => {
+        const target = e.target;
+        if (target.matches("a.delete-row")) {
+            const id = target.getAttribute("data-id");
+            deleteTeamMember(id);
+        }
+
+
+    });
+}
+
+addEventListeners();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

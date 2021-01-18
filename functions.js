@@ -31,6 +31,8 @@ function getPersonHtml(person) {
         <td><a target="_blank" href="https://github.com/${gitHub}">Github</a></td>
         <td>
             <a href="#" class="delete-row" data-id="${person.id}">&#10006;</a>
+            
+
         </td>
     </tr>`;
 }
@@ -75,7 +77,6 @@ function saveTeamMember() {
         .then(r => {
             console.warn(r);
             if (r.success) {
-                alert('saving data..., please wait until we are ready.');
                 console.info('refresh list');
                 loadList();
             }
@@ -84,13 +85,16 @@ function saveTeamMember() {
 
 function deleteTeamMember(id) {
     console.warn('delete', id);
-    fetch("http://localhost:3000/teams-json/delete", {
+    fetch(API.DELETE, {
         method: "DELETE",
         headers: {
             "Content-Type": "application/json"
         },
         body: JSON.stringify({ id })
+    }).then(res => {
+        location.reload();
     });
+
 
 }
 
